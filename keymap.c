@@ -15,22 +15,6 @@ enum ferris_layers {
     _NUMS,
 };
 
-typedef struct {
-    bool is_press_action;
-    uint8_t state;
-} tap;
-
-enum {
-    SINGLE_TAP = 1,
-    SINGLE_HOLD = 2,
-    DOUBLE_TAP = 3,
-    DOUBLE_HOLD = 4,
-    DOUBLE_SINGLE_TAP = 5, //send two single taps
-    TRIPLE_TAP = 6,
-    TRIPLE_HOLD = 7
-};
-
-
 int cur_dance (tap_dance_state_t *state);
 
 //for the x tap dance. Put it here so it can be used in any keymap
@@ -53,7 +37,7 @@ enum ferris_tap_dances {
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [_COLEMAK] = LAYOUT( /* COLEMAK */
-                        KC_Q,    KC_W,    KC_F,    KC_P,        KC_B,            KC_J,     KC_L,   KC_L,    KC_Y,   KC_SCLN,
+                        KC_Q,    KC_W,    KC_F,    KC_P,        KC_B,            KC_J,     KC_L,   KC_U,    KC_Y,   KC_SCLN,
                         KC_A,    KC_R,    KC_S,    KC_T,        KC_G,            KC_M,     KC_N,   KC_E,    KC_I,   KC_O,
                         KC_Z,    KC_X,    KC_C,    KC_D,        KC_V,            KC_K,     KC_H,   KC_COMM, KC_DOT, KC_SLSH,
                                                    MO(_SYMBOL), MO(_NAVI),       KC_SPACE, KC_BSPC
@@ -61,20 +45,20 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
     [_SYMBOL] = LAYOUT( /* [> SYMBOL <] */
                        KC_TRNS,      KC_TAB,       KC_GRV,       KC_BSLS,      KC_TRNS,         KC_TILD, KC_GRV,    KC_QUOT,         KC_DQT,   KC_EQL,
-                       OSM(KC_LGUI), OSM(KC_LALT), OSM(KC_LCTL), OSM(KC_LSFT), KC_TRNS,         KC_TRNS, TD_PARENS, TD_SQUARE,       TD_CURLY, TD_ANGLED,
-                       KC_TRNS,      KC_TRNS,      KC_TRNS,      KC_TRNS,      KC_TRNS,         KC_LT,   TD_QUOTE,  TD_DOUBLE_QUOTE, KC_SLSH,  KC_MINS,
+                       OSM(MOD_LGUI), OSM(MOD_LALT), OSM(MOD_LCTL), OSM(MOD_LSFT), KC_TRNS,     KC_TRNS, TD(TD_PARENS), TD(TD_SQUARE), TD(TD_CURLY), TD(TD_ANGLED),
+                       KC_TRNS,      KC_TRNS,      KC_TRNS,      KC_TRNS,      KC_TRNS,         KC_LT,   TD(TD_QUOTE),  TD(TD_DOUBLE_QUOTE), KC_SLSH,  KC_MINS,
                                                                  KC_TRNS,      MO(_NUMS),       KC_TRNS, KC_TRNS
                        ),
 
     [_NAVI] = LAYOUT( /* [> NAVIGATION <] */
                      KC_TRNS,      KC_TRNS,      KC_TRNS,      KC_TRNS,      KC_TRNS,           KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,
-                     OSM(KC_LGUI), OSM(KC_LALT), OSM(KC_LCTL), OSM(KC_LSFT), KC_TRNS,           KC_TRNS, KC_LEFT, KC_UP,   KC_DOWN, KC_RIGHT,
+                     OSM(MOD_LGUI), OSM(MOD_LALT), OSM(MOD_LCTL), OSM(MOD_LSFT), KC_TRNS,           KC_TRNS, KC_LEFT, KC_UP,   KC_DOWN, KC_RIGHT,
                      KC_TRNS,      KC_TRNS,      KC_TRNS,      KC_TRNS,      KC_TRNS,           KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,
                                                                MO(_NUMS),    KC_TRNS,           KC_TRNS, KC_TRNS
                      ),
 
     [_NUMS] = LAYOUT( /* [> NUMBERS <] */
-                     KC_TRNS, KC_AMPR,   KC_ASTR, KC_LPRN, KC_5,            KC_TRNS, KC_7, KC_8, KC_9, KC_TRNS,
+                     KC_TRNS, KC_AMPR,   KC_ASTR, KC_LPRN, QK_BOOT,            KC_TRNS, KC_7, KC_8, KC_9, KC_TRNS,
                      KC_TRNS, KC_DOLLAR, KC_PERC, KC_CIRC, KC_END,          KC_TRNS, KC_4, KC_5, KC_6, KC_TRNS,
                      KC_TRNS, KC_EXLM,   KC_AT,   KC_HASH, KC_BTN2,         KC_0,    KC_1, KC_2, KC_3, KC_TRNS,
                                                   KC_TRNS, KC_TRNS,         KC_TRNS, KC_TRNS
@@ -82,85 +66,45 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 };
 
 
-int cur_dance (tap_dance_state_t *state) {
-    if (state->count == 1) {
-        if (state->interrupted || !state->pressed)  return SINGLE_TAP;
-            //key has not been interrupted, but they key is still held. Means you want to send a 'HOLD'.
-        else return SINGLE_HOLD;
-    }
-    else if (state->count == 2) {
-        /*
-     * DOUBLE_SINGLE_TAP is to distinguish between typing "pepper", and actually wanting a double tap
-     * action when hitting 'pp'. Suggested use case for this return value is when you want to send two
-     * keystrokes of the key, and not the 'double tap' action/macro.
-    */
-        if (state->interrupted) return DOUBLE_SINGLE_TAP;
-        else if (state->pressed) return DOUBLE_HOLD;
-        else return DOUBLE_TAP;
-    }
-    //Assumes no one is trying to type the same letter three times (at least not quickly).
-    //If your tap dance key is 'KC_W', and you want to type "www." quickly - then you will need to add
-    //an exception here to return a 'TRIPLE_SINGLE_TAP', and define that enum just like 'DOUBLE_SINGLE_TAP'
-    if (state->count == 3) {
-        if (state->interrupted || !state->pressed)  return TRIPLE_TAP;
-        else return TRIPLE_HOLD;
-    }
-    else return 8; //magic number. At some point this method will expand to work for more presses
-}
-
-//instanalize an instance of 'tap' for the 'x' tap dance.
-static tap xtap_state = {
-    .is_press_action = true,
-    .state = 0
-};
-
 void parens_tap (tap_dance_state_t *state, void *user_data){
-    xtap_state.state = cur_dance(state);
-    switch (xtap_state.state) {
-        case SINGLE_TAP: register_code(KC_LEFT_SHIFT); register_code(KC_9); unregister_code(KC_LEFT_SHIFT); unregister_code(KC_9); break;
-        case SINGLE_HOLD: register_code(KC_LEFT_SHIFT); register_code(KC_0); unregister_code(KC_LEFT_SHIFT); unregister_code(KC_0); break;
-        case DOUBLE_TAP: register_code(KC_LEFT_SHIFT);  register_code(KC_9); register_code(KC_0); unregister_code(KC_LEFT_SHIFT); register_code(KC_LEFT); break;
+    switch (state->count) {
+        case 1: register_code(KC_LEFT_SHIFT); register_code(KC_9); unregister_code(KC_LEFT_SHIFT); unregister_code(KC_9); break;
+        case 2: register_code(KC_LEFT_SHIFT); register_code(KC_0); unregister_code(KC_LEFT_SHIFT); unregister_code(KC_0); break;
+        default: register_code(KC_LEFT_SHIFT);  register_code(KC_9); register_code(KC_0); unregister_code(KC_LEFT_SHIFT); unregister_code(KC_9); unregister_code(KC_0); register_code(KC_LEFT); unregister_code(KC_LEFT); break;
     }
 }
 
 void square_tap (tap_dance_state_t *state, void *user_data){
-    xtap_state.state = cur_dance(state);
-    switch (xtap_state.state) {
-        case SINGLE_TAP: register_code(KC_LEFT_SHIFT); register_code(KC_9); unregister_code(KC_LEFT_SHIFT); unregister_code(KC_9); break;
-        case SINGLE_HOLD: register_code(KC_LEFT_SHIFT); register_code(KC_0); unregister_code(KC_LEFT_SHIFT); unregister_code(KC_0); break;
-        case DOUBLE_TAP: register_code(KC_LEFT_SHIFT);  register_code(KC_9); register_code(KC_0); unregister_code(KC_LEFT_SHIFT); register_code(KC_LEFT); break;
+    switch (state->count) {
+        case 1: register_code(KC_LBRC); unregister_code(KC_LBRC); break;
+        case 2: register_code(KC_RBRC); unregister_code(KC_RBRC); break;
+        default: register_code(KC_LBRC);  unregister_code(KC_LBRC); register_code(KC_RBRC); unregister_code(KC_RBRC); register_code(KC_LEFT); unregister_code(KC_LEFT); break;
     }
 }
 void curly_tap (tap_dance_state_t *state, void *user_data){
-    xtap_state.state = cur_dance(state);
-    switch (xtap_state.state) {
-        case SINGLE_TAP: register_code(KC_LEFT_SHIFT); register_code(KC_9); unregister_code(KC_LEFT_SHIFT); unregister_code(KC_9); break;
-        case SINGLE_HOLD: register_code(KC_LEFT_SHIFT); register_code(KC_0); unregister_code(KC_LEFT_SHIFT); unregister_code(KC_0); break;
-        case DOUBLE_TAP: register_code(KC_LEFT_SHIFT);  register_code(KC_9); register_code(KC_0); unregister_code(KC_LEFT_SHIFT); register_code(KC_LEFT); break;
+    switch (state->count) {
+        case 1: register_code(KC_LEFT_SHIFT); register_code(KC_LBRC); unregister_code(KC_LEFT_SHIFT); unregister_code(KC_LBRC); break;
+        case 2: register_code(KC_LEFT_SHIFT); register_code(KC_RBRC); unregister_code(KC_LEFT_SHIFT); unregister_code(KC_RBRC); break;
+        default: register_code(KC_LEFT_SHIFT);  register_code(KC_LBRC); register_code(KC_RBRC); unregister_code(KC_LEFT_SHIFT); unregister_code(KC_LBRC); unregister_code(KC_RBRC); register_code(KC_LEFT); unregister_code(KC_LEFT); break;
     }
 }
 void angled_tap (tap_dance_state_t *state, void *user_data){
-    xtap_state.state = cur_dance(state);
-    switch (xtap_state.state) {
-        case SINGLE_TAP: register_code(KC_LEFT_SHIFT); register_code(KC_9); unregister_code(KC_LEFT_SHIFT); unregister_code(KC_9); break;
-        case SINGLE_HOLD: register_code(KC_LEFT_SHIFT); register_code(KC_0); unregister_code(KC_LEFT_SHIFT); unregister_code(KC_0); break;
-        case DOUBLE_TAP: register_code(KC_LEFT_SHIFT);  register_code(KC_9); register_code(KC_0); unregister_code(KC_LEFT_SHIFT); register_code(KC_LEFT); break;
+    switch (state->count) {
+        case 1: register_code(KC_LEFT_SHIFT); register_code(KC_COMM); unregister_code(KC_LEFT_SHIFT); unregister_code(KC_COMM); break;
+        case 2: register_code(KC_LEFT_SHIFT); register_code(KC_DOT); unregister_code(KC_LEFT_SHIFT); unregister_code(KC_DOT); break;
+        default: register_code(KC_LEFT_SHIFT);  register_code(KC_COMM); register_code(KC_DOT); unregister_code(KC_LEFT_SHIFT); unregister_code(KC_COMM); unregister_code(KC_DOT); register_code(KC_LEFT); unregister_code(KC_LEFT); break;
     }
 }
 void quote_tap (tap_dance_state_t *state, void *user_data){
-    xtap_state.state = cur_dance(state);
-    switch (xtap_state.state) {
-        case SINGLE_TAP: register_code(KC_LEFT_SHIFT); register_code(KC_9); unregister_code(KC_LEFT_SHIFT); unregister_code(KC_9); break;
-        case SINGLE_HOLD: register_code(KC_LEFT_SHIFT); register_code(KC_0); unregister_code(KC_LEFT_SHIFT); unregister_code(KC_0); break;
-        case DOUBLE_TAP: register_code(KC_LEFT_SHIFT);  register_code(KC_9); register_code(KC_0); unregister_code(KC_LEFT_SHIFT); register_code(KC_LEFT); break;
+    switch (state->count) {
+        case 1: register_code(KC_QUOT); unregister_code(KC_QUOT); break;
+        default: register_code(KC_QUOT); unregister_code(KC_QUOT);register_code(KC_QUOT); unregister_code(KC_QUOT); register_code(KC_LEFT); unregister_code(KC_LEFT); break;
     }
 }
 void d_quote_tap (tap_dance_state_t *state, void *user_data){
-    xtap_state.state = cur_dance(state);
-    switch (xtap_state.state) {
-        case SINGLE_TAP: register_code(KC_LEFT_SHIFT); register_code(KC_9); unregister_code(KC_LEFT_SHIFT); unregister_code(KC_9); break;
-        case SINGLE_HOLD: register_code(KC_LEFT_SHIFT); register_code(KC_0); unregister_code(KC_LEFT_SHIFT); unregister_code(KC_0); break;
-        case DOUBLE_TAP: register_code(KC_LEFT_SHIFT);  register_code(KC_9); register_code(KC_0); unregister_code(KC_LEFT_SHIFT); register_code(KC_LEFT); break;
+    switch (state->count) {
+        case 1: register_code(KC_LEFT_SHIFT); register_code(KC_QUOT); unregister_code(KC_QUOT); unregister_code(KC_LEFT_SHIFT); break;
+        default: register_code(KC_LEFT_SHIFT); register_code(KC_QUOT); unregister_code(KC_QUOT);register_code(KC_QUOT); unregister_code(KC_QUOT); unregister_code(KC_LEFT_SHIFT); register_code(KC_LEFT); unregister_code(KC_LEFT); break;
     }
 }
 
