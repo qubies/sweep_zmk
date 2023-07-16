@@ -13,8 +13,6 @@ enum ferris_layers {
     _SYMBOL,
     _NAVI,
     _NUMS,
-    _FUNCS,
-    _MEDIA
 };
 
 typedef struct {
@@ -55,43 +53,32 @@ enum ferris_tap_dances {
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [_COLEMAK] = LAYOUT( /* COLEMAK */
-                        KC_Q,    KC_W,    KC_F,    KC_P,    KC_B,            KC_J,    KC_L,  KC_L,    KC_Y,   KC_SCLN,
-                        KC_A,    KC_R,    KC_S,    KC_T,    KC_G,            KC_M,    KC_N,  KC_E,    KC_I,   KC_O,
-                        KC_Z,    KC_X,    KC_C,    KC_D,    KC_V,            KC_K,    KC_H,  KC_COMM, KC_DOT, KC_SLSH,
-                        KC_Z, KC_Z, KC_Z, KC_Z
+                        KC_Q,    KC_W,    KC_F,    KC_P,        KC_B,            KC_J,     KC_L,   KC_L,    KC_Y,   KC_SCLN,
+                        KC_A,    KC_R,    KC_S,    KC_T,        KC_G,            KC_M,     KC_N,   KC_E,    KC_I,   KC_O,
+                        KC_Z,    KC_X,    KC_C,    KC_D,        KC_V,            KC_K,     KC_H,   KC_COMM, KC_DOT, KC_SLSH,
+                                                   MO(_SYMBOL), MO(_NAVI),       KC_SPACE, KC_BSPC
                         ),
 
-    [_SYMBOL] = LAYOUT( /* [> LOWER <] */
-                       KC_TRNS,      KC_TAB,       KC_GRV,       KC_BSLS,      KC_TRNS,         KC_TILD, KC_GRV,  KC_QUOT, KC_DQT,  KC_EQL,
-                       OSM(KC_LGUI), OSM(KC_LALT), OSM(KC_LCTL), OSM(KC_LSFT), KC_TRNS,         KC_TRNS, TD_PARENS, TD_SQUARE,   TD_CURLY, TD_ANGLED,
-                       KC_TRNS,      KC_TRNS,      KC_TRNS,      KC_TRNS,      KC_TRNS,         KC_LT, TD_QUOTE, TD_DOUBLE_QUOTE, KC_SLSH, KC_MINS,
-                       KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS
+    [_SYMBOL] = LAYOUT( /* [> SYMBOL <] */
+                       KC_TRNS,      KC_TAB,       KC_GRV,       KC_BSLS,      KC_TRNS,         KC_TILD, KC_GRV,    KC_QUOT,         KC_DQT,   KC_EQL,
+                       OSM(KC_LGUI), OSM(KC_LALT), OSM(KC_LCTL), OSM(KC_LSFT), KC_TRNS,         KC_TRNS, TD_PARENS, TD_SQUARE,       TD_CURLY, TD_ANGLED,
+                       KC_TRNS,      KC_TRNS,      KC_TRNS,      KC_TRNS,      KC_TRNS,         KC_LT,   TD_QUOTE,  TD_DOUBLE_QUOTE, KC_SLSH,  KC_MINS,
+                                                                 KC_TRNS,      MO(_NUMS),       KC_TRNS, KC_TRNS
                        ),
 
-    [_NAVI] = LAYOUT( /* [> RAISE <] */
-                     KC_F1,   KC_F2,   KC_F3,   KC_F4,   KC_F5,           KC_F6,   KC_F7,   KC_F8,   KC_F9,   KC_F10,
-                     KC_TAB,  KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,         KC_MINS, KC_EQL,  KC_LBRC, KC_RBRC, KC_PIPE,
-                     KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,         KC_UNDS, KC_PLUS, KC_TRNS, KC_TRNS, QK_BOOT,
-                     KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS
+    [_NAVI] = LAYOUT( /* [> NAVIGATION <] */
+                     KC_TRNS,      KC_TRNS,      KC_TRNS,      KC_TRNS,      KC_TRNS,           KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,
+                     OSM(KC_LGUI), OSM(KC_LALT), OSM(KC_LCTL), OSM(KC_LSFT), KC_TRNS,           KC_TRNS, KC_LEFT, KC_UP,   KC_DOWN, KC_RIGHT,
+                     KC_TRNS,      KC_TRNS,      KC_TRNS,      KC_TRNS,      KC_TRNS,           KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,
+                                                               MO(_NUMS),    KC_TRNS,           KC_TRNS, KC_TRNS
                      ),
-    [_NUMS] = LAYOUT( /* [> LOWER <] */
-                     KC_1,    KC_2,    KC_3,    KC_4,    KC_5,            KC_6,    KC_7,    KC_8,    KC_9,    KC_0,
-                     KC_Z, KC_HOME, KC_PGDN, KC_PGUP, KC_END,          KC_LEFT, KC_DOWN, KC_UP,   KC_RGHT, KC_QUOT,
-                     KC_TRNS, KC_TRNS, KC_TRNS, KC_BTN1, KC_BTN2,         KC_MS_L, KC_MS_D, KC_MS_U, KC_MS_R, KC_ENT,
-                     KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS
-                     ),
-    [_FUNCS] = LAYOUT( /* [> LOWER <] */
-                      KC_1,    KC_2,    KC_3,    KC_4,    KC_5,            KC_6,    KC_7,    KC_8,    KC_9,    KC_0,
-                      KC_Z, KC_HOME, KC_PGDN, KC_PGUP, KC_END,          KC_LEFT, KC_DOWN, KC_UP,   KC_RGHT, KC_QUOT,
-                      KC_TRNS, KC_TRNS, KC_TRNS, KC_BTN1, KC_BTN2,         KC_MS_L, KC_MS_D, KC_MS_U, KC_MS_R, KC_ENT,
-                      KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS
-                      ),
-    [_MEDIA] = LAYOUT( /* [> LOWER <] */
-                      KC_1,    KC_2,    KC_3,    KC_4,    KC_5,            KC_6,    KC_7,    KC_8,    KC_9,    KC_0,
-                      QK_GESC, KC_HOME, KC_PGDN, KC_PGUP, KC_END,          KC_LEFT, KC_DOWN, KC_UP,   KC_RGHT, KC_QUOT,
-                      KC_TRNS, KC_TRNS, KC_TRNS, KC_BTN1, KC_BTN2,         KC_MS_L, KC_MS_D, KC_MS_U, KC_MS_R, KC_ENT,
-                      KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS
-                      )
+
+    [_NUMS] = LAYOUT( /* [> NUMBERS <] */
+                     KC_TRNS, KC_AMPR,   KC_ASTR, KC_LPRN, KC_5,            KC_TRNS, KC_7, KC_8, KC_9, KC_TRNS,
+                     KC_TRNS, KC_DOLLAR, KC_PERC, KC_CIRC, KC_END,          KC_TRNS, KC_4, KC_5, KC_6, KC_TRNS,
+                     KC_TRNS, KC_EXLM,   KC_AT,   KC_HASH, KC_BTN2,         KC_0,    KC_1, KC_2, KC_3, KC_TRNS,
+                                                  KC_TRNS, KC_TRNS,         KC_TRNS, KC_TRNS
+                     )
 };
 
 
